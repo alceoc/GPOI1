@@ -1,0 +1,644 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Caffè & Costi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: quaderno a quadretti; vista MENU (4 giochi + quaderno) e vista GIOCO (link al menu + scheda del gioco) */
+:root{
+  --paper:#f5f7fa; --grid:#dfe5ee; --sheet:#ffffff; --ink:#1b2433; --muted:#5a6578; --line:#cfd7e3; --soft:#eef2f7;
+  --fisso:#2457c5; --fisso-bg:#e6edfb;
+  --var:#c8261f; --var-bg:#fbe8e6;
+  --dir:#6a3fb5; --dir-bg:#efe8fa;
+  --ind:#0f7a73; --ind-bg:#dff3f1;
+  --ok:#1d7a46; --ok-bg:#e2f3e8; --ko:#b3261e; --ko-bg:#fbe5e3;
+  --accent:#2457c5; --star:#d99400;
+  --f-display:"Familjen Grotesk","Segoe UI",system-ui,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#11161f; --grid:#1a2130; --sheet:#171e2a; --ink:#e6ebf3; --muted:#9aa6ba; --line:#2c3647; --soft:#1e2737;
+  --fisso:#7ea2ff; --fisso-bg:#1c2a4d; --var:#ff7a70; --var-bg:#43201e; --dir:#b99bff; --dir-bg:#2d2347; --ind:#4fd1c5; --ind-bg:#12332f;
+  --ok:#5fd193; --ok-bg:#163826; --ko:#ff8a80; --ko-bg:#45201d; --accent:#7ea2ff; --star:#f5c04a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#11161f; --grid:#1a2130; --sheet:#171e2a; --ink:#e6ebf3; --muted:#9aa6ba; --line:#2c3647; --soft:#1e2737;
+  --fisso:#7ea2ff; --fisso-bg:#1c2a4d; --var:#ff7a70; --var-bg:#43201e; --dir:#b99bff; --dir-bg:#2d2347; --ind:#4fd1c5; --ind-bg:#12332f;
+  --ok:#5fd193; --ok-bg:#163826; --ko:#ff8a80; --ko-bg:#45201d; --accent:#7ea2ff; --star:#f5c04a; color-scheme:dark}
+
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px}
+.wrap{max-width:900px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px;display:flex;flex-direction:column;gap:24px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(2.2rem,7vw,3.2rem);letter-spacing:-.015em}
+h2{font-size:1.45rem} h3{font-size:1.08rem}
+p{margin:0}
+.eyebrow{font-family:var(--f-mono);font-size:.76rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lead{color:var(--muted);max-width:64ch}
+button{font:inherit;cursor:pointer;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.top{display:flex;flex-wrap:wrap;gap:16px 24px;align-items:flex-end;justify-content:space-between}
+.top .intro{display:flex;flex-direction:column;gap:8px;min-width:0;flex:1 1 380px}
+.stats{display:flex;gap:10px;flex-wrap:wrap}
+.stat{background:var(--sheet);border:1px solid var(--line);border-radius:6px;padding:8px 14px;display:flex;flex-direction:column}
+.stat span{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.stat b{font-family:var(--f-mono);font-size:1.15rem;font-variant-numeric:tabular-nums}
+.stat b.st{color:var(--star)}
+
+/* menu dei giochi: 4 schede, una per gioco */
+.view{display:flex;flex-direction:column;gap:24px}
+.menu{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media (max-width:640px){.menu{grid-template-columns:1fr}}
+.game{display:flex;flex-direction:column;gap:10px;text-align:left;background:var(--sheet);border:1.5px solid var(--line);border-radius:10px;padding:16px 18px;min-width:0;transition:border-color .15s,transform .15s}
+.game:hover{border-color:var(--accent);transform:translateY(-2px)}
+.game .g1{display:flex;align-items:center;gap:12px}
+.game .dot{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-mono);font-weight:600;font-size:1.15rem;border:2px solid var(--accent);color:var(--accent)}
+.game.done .dot{background:var(--accent);color:var(--sheet)}
+.game .nm{font-family:var(--f-display);font-weight:700;font-size:1.2rem;line-height:1.2;flex:1;min-width:0}
+.game .ss{font-size:1rem;color:var(--star);letter-spacing:1px;white-space:nowrap}
+.game .ss i{color:var(--line);font-style:normal}
+.game .ss.todo{font-size:.8rem;color:var(--muted);letter-spacing:0}
+.game .ds{font-size:.92rem;color:var(--muted)}
+.game .chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:.78rem;font-weight:600;padding:2px 8px;border-radius:4px;border:1px solid currentColor}
+.chip.f{color:var(--fisso)} .chip.v{color:var(--var)} .chip.d{color:var(--dir)} .chip.i{color:var(--ind)} .chip.n{color:var(--accent)}
+.chip.lock{color:var(--muted);border-style:dashed}
+.game .go{align-self:flex-start;font-weight:700;font-size:.92rem;color:var(--sheet);background:var(--accent);padding:6px 14px;border-radius:6px}
+
+/* barra in cima a ogni gioco: link al menu + scorciatoie 1-4 */
+.gamebar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
+.backlink{font-weight:700;color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:4px 0}
+.backlink:hover{text-decoration:underline}
+.quick{display:flex;gap:6px;align-items:center}
+.quick span{font-size:.82rem;color:var(--muted);margin-right:2px}
+.quick a{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-mono);font-weight:600;border:2px solid var(--line);color:var(--ink);text-decoration:none;background:var(--sheet)}
+.quick a:hover{border-color:var(--accent)}
+.quick a.done{border-color:var(--accent);color:var(--accent)}
+.quick a[aria-current="page"]{background:var(--accent);border-color:var(--accent);color:var(--sheet)}
+
+/* scena */
+.stage{background:var(--sheet);border:1px solid var(--line);border-radius:8px;padding:22px clamp(16px,4vw,34px);display:flex;flex-direction:column;gap:18px;min-height:300px}
+.lvhead{display:flex;flex-wrap:wrap;gap:10px 16px;justify-content:space-between;align-items:flex-start}
+.lvhead .l{display:flex;flex-direction:column;gap:6px;min-width:0}
+.lvmeta{display:flex;flex-wrap:wrap;gap:8px 16px;font-family:var(--f-mono);font-size:.78rem;color:var(--muted)}
+.lvmeta .stepn{color:var(--accent)}
+.lvbtns{display:flex;gap:8px;flex-wrap:wrap}
+.story{background:var(--soft);border-radius:6px;padding:14px 16px;max-width:70ch}
+.task{font-weight:600}
+.body{display:flex;flex-direction:column;gap:16px}
+
+.btn{font-weight:600;padding:9px 18px;border-radius:6px;border:1.5px solid var(--accent);background:var(--accent);color:var(--sheet)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.sm{padding:5px 12px;font-size:.88rem}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.opts{display:flex;flex-direction:column;gap:8px;max-width:640px}
+.opts.inline{flex-direction:row;flex-wrap:wrap}
+.opt{text-align:left;padding:9px 16px;border-radius:6px;border:1.5px solid var(--line);background:var(--sheet);transition:border-color .15s;font-weight:600}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.opt.wrong{background:var(--ko-bg);border-color:var(--ko);color:var(--ko);text-decoration:line-through}
+.fb{padding:10px 14px;border-radius:6px;max-width:70ch}
+.fb.ok{background:var(--ok-bg)} .fb.ko{background:var(--ko-bg)} .fb.info{background:var(--fisso-bg)}
+.fb strong{font-weight:700}
+input[type=text]{font-family:var(--f-mono);font-size:1rem;width:8em;padding:7px 9px;border:1.5px solid var(--line);border-radius:6px;background:var(--sheet);color:var(--ink)}
+input.good{border-color:var(--ok);background:var(--ok-bg)} input.bad{border-color:var(--ko);background:var(--ko-bg)}
+.slider{display:flex;flex-direction:column;gap:4px;max-width:560px}
+.slider label{display:flex;justify-content:space-between;font-weight:600;font-size:.95rem}
+.slider output{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.hint{color:var(--muted);font-size:.9rem}
+
+/* registro */
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:.92rem}
+th,td{padding:7px 12px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+thead th{font-family:var(--f-mono);font-size:.76rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:var(--soft)}
+tbody tr:last-child td{border-bottom:0}
+tr.qrow td{font-weight:700;background:var(--soft)}
+td.num{font-family:var(--f-mono)} td.chg{color:var(--var);font-weight:600}
+
+/* classificazione per righe */
+.cls{display:flex;flex-direction:column;border-top:1px solid var(--line);max-width:720px}
+.cl{display:grid;grid-template-columns:1fr auto;gap:8px 14px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.cl .t{min-width:0;font-weight:600}
+.cl .fb{grid-column:1/-1;font-size:.92rem}
+@media (max-width:560px){.cl{grid-template-columns:1fr}}
+
+/* grafici */
+.chartbox{overflow-x:auto;max-width:680px;border:1px solid var(--line);border-radius:6px;padding:6px}
+.chartbox svg{display:block;width:100%;min-width:480px;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.9rem}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:22px;height:0;border-top:3px solid currentColor}
+.legend i.dash{border-top-style:dashed}
+
+/* fabbrica */
+.costcard{border:1.5px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px;max-width:640px}
+.costcard .what{font-family:var(--f-display);font-size:1.25rem;font-weight:700}
+.bins{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:720px}
+.bin{border:1.5px dashed var(--line);border-radius:6px;padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.bin>b{font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+.bin.d>b{color:var(--dir)} .bin.i>b{color:var(--ind)}
+.bin span{border-radius:4px;padding:3px 8px;font-size:.88rem}
+.bin.d span{background:var(--dir-bg)} .bin.i span{background:var(--ind-bg)}
+.bin em{font-style:normal;color:var(--muted);font-size:.8rem}
+
+/* matrice */
+.mx{display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;max-width:720px;font-size:.88rem}
+.mx .h{font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;padding:4px 6px;display:flex;align-items:end}
+.mx .h.f{color:var(--fisso)} .mx .h.v{color:var(--var)} .mx .h.d{color:var(--dir)} .mx .h.i{color:var(--ind)}
+.mx .c{border:1.5px dashed var(--line);border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:4px;min-height:56px;min-width:0}
+.mx .c span{background:var(--soft);border-radius:4px;padding:2px 7px}
+
+.win{display:flex;flex-direction:column;gap:14px;align-items:flex-start}
+.win .stars{font-size:2.2rem;color:var(--star);letter-spacing:4px}
+.win .stars i{color:var(--line);font-style:normal}
+
+/* gioco 5: schede degli esercizi liberi */
+.subtabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media (max-width:560px){.subtabs{grid-template-columns:1fr}}
+.subtab{display:flex;flex-direction:column;gap:2px;text-align:left;padding:9px 12px;border-radius:6px;border:1.5px solid var(--line);background:var(--sheet);min-width:0}
+.subtab:hover{border-color:var(--accent)}
+.subtab b{font-family:var(--f-mono);font-size:.8rem;letter-spacing:.03em;color:var(--accent)}
+.subtab small{font-size:.86rem;color:var(--muted);line-height:1.3}
+.subtab.done{border-color:var(--ok);background:var(--ok-bg)}
+.subtab.done b{color:var(--ok)}
+.subtab[aria-current="step"]{border-color:var(--accent);box-shadow:0 0 0 3px var(--fisso-bg)}
+
+/* gioco 5: sequenza delle fasi */
+.phases{display:flex;flex-wrap:wrap;gap:8px}
+.ph{padding:9px 16px;border-radius:6px;border:1.5px solid var(--line);background:var(--sheet);font-weight:600;text-align:left;max-width:260px}
+.ph:hover:not(:disabled){border-color:var(--accent)}
+.ph small{display:block;font-weight:400;font-size:.84rem;color:var(--muted)}
+.ph:disabled{opacity:.3;cursor:default}
+.ph.shake{border-color:var(--ko);animation:sh .3s}
+@keyframes sh{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.seq{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:46px;padding:8px;border:1px dashed var(--line);border-radius:6px}
+.seq .s{font-family:var(--f-mono);font-size:.85rem;padding:5px 10px;border-radius:4px;background:var(--fisso-bg);color:var(--fisso)}
+.seq .a{color:var(--muted)}
+.game:last-child:nth-child(odd){grid-column:1/-1}
+
+/* quaderno */
+.nb{display:flex;flex-direction:column;gap:12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.card{background:var(--sheet);border:1px solid var(--line);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.card .k{font-family:var(--f-mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em}
+.card h3{font-size:1.05rem}
+.card p{font-size:.92rem}
+.card.locked{background:transparent;border-style:dashed}
+.card.locked h3,.card.locked p{color:var(--muted)}
+.card.new{animation:pop .6s ease-out}
+.k.f{color:var(--fisso)} .k.v{color:var(--var)} .k.d{color:var(--dir)} .k.i{color:var(--ind)} .k.n{color:var(--accent)}
+@keyframes pop{0%{transform:scale(.92);opacity:.4}100%{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<main class="wrap">
+  <!-- MENU: scelta libera dei giochi -->
+  <div class="view" id="menu">
+    <section class="top">
+      <div class="intro">
+        <span class="eyebrow">Gestione progetto e organizzazione d'impresa · 5ª Informatica</span>
+        <h1>Caffè &amp; Costi</h1>
+        <p class="lead">Cinque giochi per scoprire da solo la differenza tra costi fissi e variabili, tra costi diretti e indiretti, e i costi del ciclo di vita di un prodotto. Scegli tu da quale iniziare: puoi giocarli in qualsiasi ordine e ripeterli quante volte vuoi.</p>
+      </div>
+      <div class="stats">
+        <div class="stat"><span>Stelle</span><b class="st" id="stStars">0 / 15</b></div>
+        <div class="stat"><span>Concetti</span><b id="stConc">0 / 8</b></div>
+      </div>
+    </section>
+
+    <nav aria-label="Menu dei giochi">
+      <h2 style="margin-bottom:12px">Scegli un gioco</h2>
+      <div class="menu" id="menuGrid"></div>
+    </nav>
+
+    <section class="nb">
+      <h2>Il quaderno dei concetti</h2>
+      <div class="cards" id="cards"></div>
+    </section>
+  </div>
+
+  <!-- GIOCO: un livello alla volta, con link per tornare al menu -->
+  <div class="view" id="gioco" hidden>
+    <div class="gamebar">
+      <a href="#menu" class="backlink" id="backTop">← Torna al menu</a>
+      <nav class="quick" id="quick" aria-label="Cambia gioco"></nav>
+    </div>
+    <section class="stage" id="stage" aria-live="polite"></section>
+  </div>
+</main>
+
+<script>
+const $=s=>document.querySelector(s);
+const eur=(v,d=0)=>v.toLocaleString('it-IT',{style:'currency',currency:'EUR',minimumFractionDigits:d,maximumFractionDigits:d});
+const nf=v=>v.toLocaleString('it-IT');
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a};
+function num(s){s=String(s).trim().replace(/[\s€]/g,'');if(s.includes(',')){s=s.replace(/\./g,'').replace(',','.')}else if(/^\d{1,3}(\.\d{3})+$/.test(s)){s=s.replace(/\./g,'')}return parseFloat(s)}
+
+/* ===== modello del bar ===== */
+const BILLS=[
+  {k:'affitto',n:'Affitto del locale',t:'F',v:1800},
+  {k:'macchina',n:'Noleggio macchina da caffè',t:'F',v:300},
+  {k:'dehor',n:'Tassa suolo pubblico (dehor)',t:'F',v:400},
+  {k:'caffe',n:'Caffè e zucchero',t:'V',v:0.15},
+  {k:'acqua',n:'Acqua e detersivo',t:'V',v:0.05},
+];
+const bill=(b,q)=>b.t==='F'?b.v:b.v*q;
+const CF=2500, CVU=0.20;
+
+/* ===== concetti ===== */
+const CONCEPTS=[
+  {id:'fissi',c:'f',k:'Livello 1',t:'Costi fissi',d:'Non cambiano nel loro valore totale, sia che si produca zero sia la quantità massima consentita dalla capacità produttiva. Esempi: affitto, noleggio della macchina da caffè, tassa sul dehor.'},
+  {id:'variabili',c:'v',k:'Livello 1',t:'Costi variabili',d:'Cambiano in modo direttamente proporzionale alla quantità: zero per zero unità, un "tot" per una, due "tot" per due. Esempi: caffè, zucchero, acqua, detersivo.'},
+  {id:'grafico',c:'n',k:'Livello 2',t:'Il grafico dei costi',d:'I costi fissi sono una linea orizzontale: stesso valore per ogni quantità. I costi variabili sono una retta che parte da zero e sale, tanto più ripida quanto più alto è il costo per unità. Il costo totale è la somma delle due e parte dal valore dei costi fissi.'},
+  {id:'diretti',c:'d',k:'Livello 3',t:'Costi diretti',d:'Si attribuiscono al singolo prodotto. Lavoro diretto: chi interviene nella realizzazione del prodotto (l\'operaio di reparto). Materiali diretti: materie prime, semilavorati e componenti necessari a realizzarlo.'},
+  {id:'indiretti',c:'i',k:'Livello 3',t:'Costi indiretti',d:'Riguardano tutta l\'attività produttiva, non un prodotto preciso. Possono essere fissi (affitto dei locali di produzione, assicurazioni) o variabili (supervisione, manutenzione, controllo qualità, energia).'},
+  {id:'matrice',c:'n',k:'Livello 4',t:'Due classificazioni insieme',d:'Diretto/indiretto risponde alla domanda «a chi lo attribuisco?». Fisso/variabile risponde a «cambia con la quantità?». Ogni costo ha entrambe le etichette: i materiali diretti sono variabili, l\'affitto della fabbrica è indiretto fisso, la manutenzione è indiretta variabile.'},
+  {id:'lcc',c:'n',k:'Livello 5',t:'Life cycle costing',d:'Il ciclo di vita di un prodotto si compone di concept, progettazione, ingegnerizzazione (passaggio dal prototipo alla produzione in serie), produzione e logistica. In ogni fase si sostengono costi: il life cycle costing è la tecnica per stimarli.'},
+  {id:'wlc',c:'n',k:'Livello 5',t:'Whole life cycle cost',d:'È il costo del ciclo di vita comprensivo dei costi sostenuti dall\'utente: installazione, esercizio, manutenzione e smaltimento.'},
+];
+
+/* ===== stato (solo stelle e concetti; i livelli sono sempre aperti) ===== */
+const KEY='caffe-costi-v3';
+const fresh=()=>({stars:[0,0,0,0,0],concepts:[],current:0});
+let S=fresh();
+try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(fresh(),JSON.parse(r))}catch(e){}
+while(S.stars.length<5)S.stars.push(0); /* progressi salvati con la versione a 4 giochi */
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+
+/* ===== grafico leggibile: valori su entrambi gli assi, etichette sui punti ===== */
+function chart({xmax,ymax,xstep,ystep,xlab,ylab='Costo (€)',series=[],marker=null}){
+  const w=640,h=380,L=86,R=w-24,T=20,B=h-66;
+  const x=v=>L+v/xmax*(R-L), y=v=>B-Math.min(v,ymax)/ymax*(B-T);
+  const mono='font-family="JetBrains Mono,monospace"';
+  let g='';
+  for(let v=0;v<=ymax+1e-9;v+=ystep) g+=`<line x1="${L}" x2="${R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-10}" y="${y(v)+4.5}" text-anchor="end" font-size="13" fill="var(--ink)" ${mono}>${nf(v)} €</text>`;
+  for(let v=0;v<=xmax;v+=xstep) g+=`<line x1="${x(v)}" x2="${x(v)}" y1="${T}" y2="${B}" stroke="var(--line)"/><line x1="${x(v)}" x2="${x(v)}" y1="${B}" y2="${B+6}" stroke="var(--muted)"/><text x="${x(v)}" y="${B+22}" text-anchor="middle" font-size="13" fill="var(--ink)" ${mono}>${nf(v)}</text>`;
+  g+=`<line x1="${L}" x2="${R}" y1="${B}" y2="${B}" stroke="var(--ink)" stroke-width="1.5"/><line x1="${L}" x2="${L}" y1="${T}" y2="${B}" stroke="var(--ink)" stroke-width="1.5"/>`;
+  g+=`<text x="${(L+R)/2}" y="${B+50}" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink)">${xlab}</text>`;
+  g+=`<text x="18" y="${(T+B)/2}" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink)" transform="rotate(-90 18 ${(T+B)/2})">${ylab}</text>`;
+  series.forEach(s=>{
+    if(s.line) g+=`<polyline points="${s.pts.map(p=>x(p[0])+','+y(p[1])).join(' ')}" fill="none" stroke="${s.color}" stroke-width="3.5" stroke-linejoin="round" stroke-dasharray="${s.dash||''}"/>`;
+    if(s.tag){const p=s.pts[s.pts.length-1];g+=`<text x="${x(p[0])-6}" y="${y(p[1])-10}" text-anchor="end" font-size="14" font-weight="700" fill="${s.color}">${s.tag}</text>`}
+    if(s.dots) s.pts.forEach(p=>{g+=`<circle cx="${x(p[0])}" cy="${y(p[1])}" r="6" fill="${s.color}" stroke="var(--sheet)" stroke-width="2"/>`;if(s.vals)g+=`<text x="${x(p[0])+9}" y="${y(p[1])-9}" font-size="13" font-weight="600" fill="${s.color}" ${mono}>${nf(p[1])} €</text>`});
+  });
+  if(marker){
+    const q=marker.q;g+=`<line x1="${x(q)}" x2="${x(q)}" y1="${T}" y2="${B}" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+    g+=`<rect x="${x(q)-30}" y="${B+6}" width="60" height="22" rx="4" fill="var(--ink)"/><text x="${x(q)}" y="${B+22}" text-anchor="middle" font-size="13" font-weight="600" fill="var(--sheet)" ${mono}>${nf(q)}</text>`;
+    // etichette valore, distanziate per non sovrapporsi
+    const items=marker.values.map(v=>({...v,yy:y(v.v)})).sort((a,b)=>a.yy-b.yy);
+    for(let i=1;i<items.length;i++) if(items[i].yy-items[i-1].yy<26) items[i].yy=items[i-1].yy+26;
+    const right=x(q)<(L+R)/2;
+    items.forEach(it=>{const cy=y(it.v);g+=`<circle cx="${x(q)}" cy="${cy}" r="6" fill="${it.color}" stroke="var(--sheet)" stroke-width="2"/>`;
+      const tx=right?x(q)+12:x(q)-12, wdt=82;const rx=right?tx:tx-wdt;
+      g+=`<rect x="${rx}" y="${it.yy-11}" width="${wdt}" height="22" rx="4" fill="var(--sheet)" stroke="${it.color}" stroke-width="1.5"/><text x="${rx+wdt/2}" y="${it.yy+4.5}" text-anchor="middle" font-size="13" font-weight="700" fill="${it.color}" ${mono}>${nf(Math.round(it.v))} €</text>`});
+  }
+  return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Grafico dei costi con valori sugli assi">${g}</svg>`;
+}
+
+/* ===== interazioni ===== */
+let API;
+function fb(box,kind,html){box.innerHTML=`<p class="fb ${kind}">${html}</p>`}
+function nextBtn(box,label,fn){const b=document.createElement('button');b.className='btn';b.type='button';b.textContent=label;b.onclick=()=>{b.disabled=true;fn()};box.appendChild(b);b.focus({preventScroll:true})}
+function mc(host,{q,opts,a,hints={},explain='',onOk,inline=false}){
+  const w=document.createElement('div');w.className='body';
+  w.innerHTML=`${q?`<p class="task">${q}</p>`:''}<div class="opts ${inline?'inline':''}"></div><div class="out"></div>`;
+  const o=w.querySelector('.opts'),out=w.querySelector('.out');
+  opts.forEach((t,i)=>{const b=document.createElement('button');b.className='opt';b.type='button';b.innerHTML=t;
+    b.onclick=()=>{
+      if(i===a){o.querySelectorAll('button').forEach(x=>x.disabled=true);b.classList.add('right');fb(out,'ok',`<strong>Giusto.</strong> ${explain}`);if(onOk)nextBtn(out,'Avanti',onOk)}
+      else{b.classList.add('wrong');b.disabled=true;API.err();fb(out,'ko',`<strong>Non ancora.</strong> ${hints[i]||'Riguarda i dati e riprova.'}`)}
+    };o.appendChild(b)});
+  host.appendChild(w);return w;
+}
+/* controlla più campi numerici insieme */
+function inputs(host,{q,fields,ok,hint,onOk}){
+  const w=document.createElement('div');w.className='body';
+  w.innerHTML=`<p class="task">${q}</p>${fields.map((f,i)=>`<div class="row"><label for="in${i}" style="min-width:16em">${f.l}</label><input type="text" id="in${i}" inputmode="decimal"> €</div>`).join('')}<div class="row"><button class="btn" type="button">Controlla</button></div><div class="out"></div>`;
+  const btn=w.querySelector('.btn'),out=w.querySelector('.out');
+  btn.onclick=()=>{let all=true;fields.forEach((f,i)=>{const el=w.querySelector('#in'+i);const good=Math.abs(num(el.value)-f.a)<0.001;el.className=good?'good':'bad';if(!good)all=false});
+    if(all){btn.disabled=true;w.querySelectorAll('input').forEach(i=>i.disabled=true);fb(out,'ok',`<strong>Esatto.</strong> ${ok}`);nextBtn(out,'Avanti',onOk)}
+    else{API.err();fb(out,'ko',hint)}};
+  host.appendChild(w);
+}
+
+/* ===== LIVELLI ===== */
+const LEVELS=[
+/* ---------- 1: fissi e variabili ---------- */
+{name:'Fissi o variabili?',steps:2,run(body,api){
+  const months=[];const MN=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno'];
+  api.story(`Hai aperto <b>il tuo bar</b>. Ogni mese arrivano cinque spese. Alcune cambiano quando servi più caffè, altre no. Gestisci qualche mese e osserva il registro.`);
+  const table=()=>{
+    if(!months.length)return'<div class="tbl"><p class="hint" style="padding:12px">Il registro è vuoto: chiudi il primo mese.</p></div>';
+    let h='<div class="tbl"><table><thead><tr><th>Spesa</th>'+months.map((m,i)=>`<th>${MN[i]}</th>`).join('')+'</tr></thead><tbody>';
+    h+='<tr class="qrow"><td>Caffè serviti</td>'+months.map(q=>`<td class="num">${nf(q)}</td>`).join('')+'</tr>';
+    BILLS.forEach(b=>{h+=`<tr><td>${b.n}</td>`+months.map((q,i)=>{const v=bill(b,q),ch=i>0&&v!==bill(b,months[i-1]);return `<td class="num${ch?' chg':''}">${eur(v)}</td>`}).join('')+'</tr>'});
+    return h+'</tbody></table></div>';
+  };
+  const s1=()=>{api.step(1);
+    body.innerHTML=`<p class="task">Scegli quanti caffè servire e chiudi il mese. Gestisci almeno 3 mesi con quantità diverse: uno tranquillo, uno normale, uno pieno.</p>
+    <div class="slider"><label for="q1">Caffè serviti nel mese <output id="q1o"></output></label><input type="range" id="q1" min="0" max="12000" step="1000" value="2000"></div>
+    <div class="row"><button class="btn" id="close" type="button">Chiudi il mese</button><span class="hint" id="mh"></span></div>
+    <div id="reg">${table()}</div><div id="out1"></div>`;
+    const r=$('#q1'),o=$('#q1o');const upd=()=>o.textContent=nf(+r.value);r.oninput=upd;upd();
+    $('#close').onclick=()=>{
+      if(months.length>=6)return;months.push(+r.value);$('#reg').innerHTML=table();
+      $('#mh').textContent=`${months.length} mes${months.length>1?'i':'e'} su 6`;
+      const out=$('#out1'),distinct=new Set(months).size;
+      if(months.length>=3&&distinct>=3){if(!out.dataset.ready){out.dataset.ready=1;fb(out,'info','Hai abbastanza dati. Le cifre colorate sono cambiate rispetto al mese prima.');nextBtn(out,'Classifica le spese',s2)}}
+      else if(months.length>=3){fb(out,'info','Servono almeno 3 mesi con un numero di caffè diverso. Prova anche 0 caffè (bar chiuso per ferie).')}
+      if(months.length>=6)$('#close').disabled=true;
+    };
+  };
+  const s2=()=>{api.step(2);
+    body.innerHTML=`${table()}<p class="task">Per ogni spesa decidi: è <span style="color:var(--fisso)">fissa</span> (sempre uguale) o <span style="color:var(--var)">variabile</span> (cambia con i caffè)?</p><div class="cls" id="cls"></div><div id="out2"></div>`;
+    let done=0;
+    shuffle(BILLS).forEach(b=>{
+      const row=document.createElement('div');row.className='cl';
+      row.innerHTML=`<div class="t">${b.n}</div><div class="opts inline"></div><p class="fb" hidden></p>`;
+      const o=row.querySelector('.opts'),f=row.querySelector('.fb');
+      [['F','Fisso'],['V','Variabile']].forEach(([k,l])=>{const x=document.createElement('button');x.type='button';x.className='opt';x.textContent=l;
+        x.onclick=()=>{
+          if(k===b.t){o.querySelectorAll('button').forEach(y=>y.disabled=true);x.classList.add('right');f.hidden=false;f.className='fb ok';
+            f.innerHTML=b.t==='F'?`Resta ${eur(b.v)} ogni mese, con 0 caffè come con il bar pieno.`:`Costa ${eur(b.v,2)} per ogni caffè: con 0 caffè è zero, con il doppio dei caffè è il doppio.`;
+            if(++done===BILLS.length){fb($('#out2'),'ok','<strong>Scoperta doppia!</strong> Le spese che restano uguali sono <b>costi fissi</b>. Quelle che crescono in proporzione ai caffè sono <b>costi variabili</b>.');nextBtn($('#out2'),'Aggiungi al quaderno',()=>api.finish(['fissi','variabili']))}}
+          else{x.classList.add('wrong');x.disabled=true;api.err();f.hidden=false;f.className='fb ko';f.textContent='Segui questa riga nel registro: il valore cambia quando cambiano i caffè serviti?'}};
+        o.appendChild(x)});
+      $('#cls').appendChild(row);
+    });
+  };
+  s1();
+}},
+/* ---------- 2: leggere i grafici ---------- */
+{name:'Leggere il grafico',steps:3,run(body,api){
+  api.story(`Il commercialista ti porta un grafico dei costi del bar. Sull'asse orizzontale ci sono i <b>caffè serviti al mese</b>, su quello verticale il <b>costo in euro</b>. Costi fissi: ${eur(CF)} al mese. Costi variabili: ${eur(CVU,2)} a caffè.`);
+  const base={xmax:12000,ymax:5000,xstep:2000,ystep:500,xlab:'Caffè serviti al mese'};
+  const linF={pts:[[0,CF],[12000,CF]],color:'var(--fisso)',line:true};
+  const linV={pts:[[0,0],[12000,CVU*12000]],color:'var(--var)',line:true};
+  const linT={pts:[[0,CF],[12000,CF+CVU*12000]],color:'var(--ink)',line:true,dash:'8 5'};
+  const s1=()=>{api.step(1);
+    //body.innerHTML=`<div class="chartbox">${chart({...base,series:[{...linV,tag:'Linea A'},{...linF,tag:'Linea B'}]})}</div><div id="m"></div>`;
+    body.innerHTML=`<div class="legend"> <span style="color:var(--var)"><i></i>Linea A</span><span style="color:var(--fisso)"><i></i>Linea B</span></div>
+     <div class="chartbox">${chart({...base,series:[linV,linF]})}</div>
+  <div id="m"></div>`;
+    
+    mc($('#m'),{q:'Quale linea rappresenta i costi fissi?',opts:['Linea A','Linea B'],a:1,inline:true,
+      hints:{0:'La linea A con 0 caffè vale 0 € e poi sale. Un costo fisso cambia con i caffè?'},
+      explain:'La linea B è orizzontale: vale 2.500 € con 0 caffè e 2.500 € anche con 12.000. La linea A parte da 0 € e sale: sono i costi variabili.',onOk:s2});
+  };
+  const s2=()=>{api.step(2);
+    body.innerHTML=`<p class="task">Sposta il cursore: il grafico mostra il valore di ogni linea per la quantità scelta.</p>
+    <div class="slider"><label for="q2">Caffè serviti <output id="q2o"></output></label><input type="range" id="q2" min="0" max="12000" step="1000" value="2000"></div>
+    <div class="legend"><span style="color:var(--fisso)"><i></i>Costi fissi</span><span style="color:var(--var)"><i></i>Costi variabili</span></div>
+    <div class="chartbox" id="ch"></div><div id="m"></div>`;
+    const r=$('#q2');const upd=()=>{const q=+r.value;$('#q2o').textContent=nf(q);
+      $('#ch').innerHTML=chart({...base,series:[linF,linV],marker:{q,values:[{v:CF,color:'var(--fisso)'},{v:CVU*q,color:'var(--var)'}]}})};r.oninput=upd;upd();
+    inputs($('#m'),{q:'Leggi i valori dal grafico per 8.000 caffè.',fields:[{l:'Costi variabili con 8.000 caffè',a:1600},{l:'Costi fissi con 8.000 caffè',a:2500},{l:'Costi variabili con 4.000 caffè',a:800}],
+      ok:'Da 4.000 a 8.000 caffè i costi variabili raddoppiano (da 800 € a 1.600 €). I costi fissi restano a 2.500 €.',
+      hint:'Porta il cursore su 8.000 (poi su 4.000) e leggi le etichette accanto ai punti. Il riquadro scuro in basso indica la quantità.',onOk:s3});
+  };
+  const s3=()=>{api.step(3);
+    body.innerHTML=`<p class="task">Ora compare la linea tratteggiata del <b>costo totale</b>: costi fissi + costi variabili.</p>
+    <div class="slider"><label for="q3">Caffè serviti <output id="q3o"></output></label><input type="range" id="q3" min="0" max="12000" step="1000" value="2000"></div>
+    <div class="legend"><span style="color:var(--fisso)"><i></i>Costi fissi</span><span style="color:var(--var)"><i></i>Costi variabili</span><span style="color:var(--ink)"><i class="dash"></i>Costo totale</span></div>
+    <div class="chartbox" id="ch"></div><div id="m"></div>`;
+    const r=$('#q3');const upd=()=>{const q=+r.value;$('#q3o').textContent=nf(q);
+      $('#ch').innerHTML=chart({...base,series:[linF,linV,linT],marker:{q,values:[{v:CF,color:'var(--fisso)'},{v:CVU*q,color:'var(--var)'},{v:CF+CVU*q,color:'var(--ink)'}]}})};r.oninput=upd;upd();
+    inputs($('#m'),{q:'Quanto vale il costo totale?',fields:[{l:'Costo totale con 0 caffè',a:2500},{l:'Costo totale con 6.000 caffè',a:3700}],
+      ok:'Con 0 caffè il totale coincide con i costi fissi (2.500 €): per questo la linea tratteggiata non parte da zero. Con 6.000 caffè: 2.500 + 1.200 = 3.700 €.',
+      hint:'Somma i due valori letti sul grafico: costi fissi + costi variabili alla stessa quantità.',onOk:()=>api.finish(['grafico'])});
+  };
+  s1();
+}},
+/* ---------- 3: diretti e indiretti ---------- */
+{name:'Diretti o indiretti?',steps:1,run(body,api){
+  api.story(`Visiti <b>TechBar</b>, un’azienda che produce chioschi digitali per ordinare al bar. Il responsabile ti svela un trucco per distinguere i costi diretti dai costi indiretti.
+  Per ogni spesa, chiediti: <b>«Questa spesa serve a realizzare uno specifico chiosco oppure riguarda il funzionamento generale dell’azienda?»</b>`);
+  const ITEMS=shuffle([
+    {t:'Stipendio dell\'operaio che monta i chioschi',d:1,sub:'lavoro diretto',why:'Si sa quante ore servono per montare ogni chiosco.'},
+    {t:'Schermo touch montato su ogni chiosco',d:1,sub:'materiale diretto',why:'Ogni chiosco ha il suo schermo.'},
+    {t:'Schede elettroniche e componenti',d:1,sub:'materiale diretto',why:'Sono i componenti che finiscono dentro ogni chiosco.'},
+    {t:'Affitto del capannone',d:0,sub:'indiretto fisso',why:'Il capannone serve a tutta la produzione e l\'affitto non dipende dai chioschi prodotti.'},
+    {t:'Addetto al controllo qualità',d:0,sub:'indiretto variabile',why:'Controlla tutta la produzione, non costruisce un chiosco preciso.'},
+    {t:'Manutenzione dei macchinari',d:0,sub:'indiretto variabile',why:'Le macchine servono per tutti i chioschi: non si può dire quanta manutenzione "sta" in uno solo.'},
+    {t:'Assicurazione dello stabilimento',d:0,sub:'indiretto fisso',why:'Protegge tutta la fabbrica e non cambia con la produzione.'},
+  ]);
+  const bins={1:[],0:[]};let i=0;
+  const binsHtml=()=>`<div class="bins"><div class="bin d"><b>Costi diretti</b>${bins[1].map(x=>`<span>${x.t} <em>· ${x.sub}</em></span>`).join('')||'<em>ancora vuoto</em>'}</div><div class="bin i"><b>Costi indiretti</b>${bins[0].map(x=>`<span>${x.t} <em>· ${x.sub}</em></span>`).join('')||'<em>ancora vuoto</em>'}</div></div>`;
+  const card=()=>{
+    if(i>=ITEMS.length){body.innerHTML=binsHtml();const out=document.createElement('div');body.appendChild(out);
+      fb(out,'ok','Lavoro e materiali che finiscono nel singolo chiosco sono <b>costi diretti</b>. Le spese che servono per la gestione dell\'azienda che produce sono <b>costi indiretti</b>, e possono essere fisse, variabili o semivariabili.');
+      nextBtn(out,'Aggiungi al quaderno',()=>api.finish(['diretti','indiretti']));return}
+    const it=ITEMS[i];api.step(1,`Spesa ${i+1} di ${ITEMS.length}`);
+    body.innerHTML=`<div class="costcard"><span class="eyebrow">Spesa da classificare</span><div class="what">${it.t}</div><div id="qq"></div></div>${binsHtml()}`;
+    mc($('#qq'),{q:'Posso dire se questa spesa è attribuibile alla produzione di un chiosco?',opts:['Sì: costo diretto','No: costo indiretto'],a:it.d?0:1,inline:true,
+      hints:{0:'Questa spesa serve a tutta la fabbrica: si potrebbe davvero dividere chiosco per chiosco?',1:'Questo lavoro o materiale finisce proprio dentro il chiosco, o è fatto per costruirlo.'},
+      explain:`${it.why} È un costo <b>${it.sub}</b>.`,onOk:()=>{bins[it.d].push(it);i++;card()}});
+  };
+  card();
+}},
+/* ---------- 4: le due classificazioni insieme ---------- */
+{name:'Due etichette',steps:1,run(body,api){
+  api.story(`Ora metti insieme le due domande. Ogni costo ha <b>due etichette</b>: diretto o indiretto (a chi lo attribuisco?) e fisso o variabile (cambia con la quantità prodotta?).`);
+  const ITEMS=shuffle([
+    {t:'Schermo touch di ogni chiosco',d:1,f:0},
+    {t:'Componenti elettronici',d:1,f:0},
+    {t:'Affitto del capannone',d:0,f:1},
+    {t:'Assicurazione dello stabilimento',d:0,f:1},
+    {t:'Energia consumata dal reparto',d:0,f:0},
+    {t:'Manutenzione dei macchinari',d:0,f:0},
+  ]);
+  const cells={'1-1':[],'1-0':[],'0-1':[],'0-0':[]};let i=0;
+  const mxHtml=()=>`<div class="mx"><div></div><div class="h f">Fisso</div><div class="h v">Variabile</div>
+    <div class="h d">Diretto</div><div class="c">${cells['1-1'].map(t=>`<span>${t}</span>`).join('')}</div><div class="c">${cells['1-0'].map(t=>`<span>${t}</span>`).join('')}</div>
+    <div class="h i">Indiretto</div><div class="c">${cells['0-1'].map(t=>`<span>${t}</span>`).join('')}</div><div class="c">${cells['0-0'].map(t=>`<span>${t}</span>`).join('')}</div></div>`;
+  const card=()=>{
+    if(i>=ITEMS.length){body.innerHTML=mxHtml();const out=document.createElement('div');body.appendChild(out);
+      fb(out,'ok','<strong>Tabella completa.</strong> Le due classificazioni sono indipendenti: i materiali diretti sono anche variabili, mentre tra gli indiretti ci sono sia costi fissi sia costi variabili. La casella «diretto fisso» qui è vuota: i costi diretti seguono il prodotto, quindi di solito crescono con la quantità.');
+      nextBtn(out,'Aggiungi al quaderno',()=>api.finish(['matrice']));return}
+    const it=ITEMS[i];api.step(1,`Spesa ${i+1} di ${ITEMS.length}`);
+    body.innerHTML=`<div class="costcard"><span class="eyebrow">Spesa da classificare</span><div class="what">${it.t}</div><div id="q1"></div><div id="q2"></div></div>${mxHtml()}`;
+    mc($('#q1'),{q:'1. Diretto o indiretto?',opts:['Diretto','Indiretto'],a:it.d?0:1,inline:true,hints:{0:'Serve a tutta la produzione, non a un chiosco preciso.',1:'Finisce dentro ogni singolo chiosco.'},
+      onOk:()=>{$('#q1').querySelector('.out').innerHTML='';
+        mc($('#q2'),{q:'2. Fisso o variabile?',opts:['Fisso','Variabile'],a:it.f?0:1,inline:true,hints:{0:'Se si producono più chioschi, questa spesa aumenta.',1:'Se si producono più chioschi, questa spesa resta uguale.'},
+          onOk:()=>{cells[`${it.d}-${it.f}`].push(it.t);i++;card()}})}});
+  };
+  card();
+}},
+/* ---------- 5: life cycle costing ---------- */
+{name:'Life cycle costing',steps:3,run(body,api){
+  api.story(`Un'azienda sviluppa e vende un <b>chiosco digitale</b> per ordinare al bar. Prima di arrivare al cliente il chiosco attraversa diverse fasi, e in ciascuna si sostengono costi: il <b>life cycle costing</b> serve a stimarli prima.`);
+  const PH=[
+    ['Concept','Si studia l\'idea: a chi serve il chiosco, cosa deve fare.'],
+    ['Progettazione','Si progettano hardware e software.'],
+    ['Ingegnerizzazione','Il prototipo diventa un modello producibile in serie.'],
+    ['Produzione','Si assemblano i chioschi in fabbrica.'],
+    ['Logistica','I chioschi vengono spediti ai clienti.'],
+  ];
+  /* tre esercizi liberi: si possono fare in qualsiasi ordine; il gioco si completa quando sono fatti tutti */
+  const EX=['Ricostruisci il ciclo di vita','Life cycle costing o whole life cycle costing?','Domanda di verifica'];
+  const done=new Set();let cur=1;
+  body.innerHTML=`<nav class="subtabs" id="subtabs" aria-label="Esercizi del gioco 5"></nav><div class="body" id="ex"></div>`;
+  const ex=$('#ex');
+  const tabs=()=>{$('#subtabs').innerHTML=EX.map((t,i)=>{const k=i+1;return `<button type="button" class="subtab ${done.has(k)?'done':''}" data-k="${k}" ${k===cur?'aria-current="step"':''}><b>Esercizio ${k} di 3${done.has(k)?' ✓':''}</b><small>${t}</small></button>`}).join('');
+    $('#subtabs').querySelectorAll('.subtab').forEach(b=>b.onclick=()=>go(+b.dataset.k));};
+  const go=k=>{cur=k;api.step(k,`Esercizio ${k} di 3`);tabs();[null,e1,e2,e3][k]();};
+  /* esercizio finito: propone il prossimo esercizio non ancora fatto, oppure chiude il gioco */
+  const complete=(k,box)=>{done.add(k);tabs();
+    const left=[1,2,3].filter(x=>!done.has(x));
+    const w=document.createElement('div');w.className='row';box.appendChild(w);
+    if(!left.length){const b=document.createElement('button');b.className='btn';b.type='button';b.textContent='Completa il gioco';b.onclick=()=>api.finish(['lcc','wlc']);w.appendChild(b);}
+    else{left.forEach((x,i)=>{const b=document.createElement('button');b.className=i?'btn ghost':'btn';b.type='button';b.textContent=`Vai all'esercizio ${x}`;b.onclick=()=>go(x);w.appendChild(b)});
+      const h=document.createElement('span');h.className='hint';h.textContent=`Esercizi completati: ${done.size} di 3`;w.appendChild(h);}
+  };
+  /* esercizio 1: ricostruisci il ciclo di vita */
+  const e1=()=>{let pos=0;
+    ex.innerHTML=`<h3>Ricostruisci il ciclo di vita</h3>
+    <p class="task">Clicca le fasi nell'ordine giusto, dalla prima all'ultima. Leggi la descrizione di ognuna.</p>
+    <div class="phases" id="ph">${shuffle(PH).map(([n,d])=>`<button class="ph" type="button" data-n="${n}">${n}<small>${d}</small></button>`).join('')}</div>
+    <div class="seq" id="seq"><span class="hint">La sequenza comparirà qui</span></div><div id="o"></div>`;
+    ex.querySelectorAll('.ph').forEach(b=>b.onclick=()=>{
+      if(b.dataset.n===PH[pos][0]){
+        if(pos===0)$('#seq').innerHTML='';
+        $('#seq').insertAdjacentHTML('beforeend',`${pos?'<span class="a">→</span>':''}<span class="s">${b.dataset.n}</span>`);
+        b.disabled=true;pos++;$('#o').innerHTML='';
+        if(pos===PH.length){fb($('#o'),'ok','<strong>Ciclo di vita ricostruito.</strong> Concept → progettazione → ingegnerizzazione → produzione → logistica. Sono le fasi in cui il <b>produttore</b> sostiene i costi.');complete(1,$('#o'))}
+      }else{
+        api.err();b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');
+        fb($('#o'),'ko',`<strong>Non ancora.</strong> «${b.dataset.n}» non è la fase numero ${pos+1}. Che cosa deve esistere prima che si possa fare questo?`);
+      }
+    });
+  };
+  /* esercizio 2: life cycle cost o whole life cycle cost? */
+  const ITEMS=[
+    {t:'Riunioni e studio di fattibilità per definire l\'idea del chiosco',a:'P',why:'Fase di concept (progettazione concettuale), a carico del produttore.'},
+    {t:'Riparazioni e aggiornamenti negli anni di utilizzo',a:'U',why:'Costi di manutenzione sostenuti dall\'utente.'},
+    {t:'Assemblaggio dei chioschi in fabbrica',a:'P',why:'Fase di produzione.'},
+    {t:'Trasformare il prototipo in un modello producibile in serie',a:'P',why:'È l\'ingegnerizzazione: dal prototipo alla produzione in serie.'},
+    {t:'Smaltimento a fine vita come rifiuto elettronico',a:'U',why:'Lo smaltimento chiude il whole life cycle costing.'},
+    {t:'Energia e connessione per tenerlo acceso ogni giorno',a:'U',why:'Sono costi di esercizio, a carico dell\'utente.'},
+    {t:'Spedizione dei chioschi ai rivenditori',a:'P',why:'Fase di logistica, ultima fase del ciclo del produttore.'},
+    {t:'Progettazione dell\'hardware e del software',a:'P',why:'Fase di progettazione.'},
+    {t:'Installazione del chiosco nel bar',a:'U',why:'L\'installazione la sostiene l\'utente: rientra nel whole life cycle costing.'},
+  ];
+  const e2=()=>{
+    ex.innerHTML=`<h3>Life cycle costing o whole life cycle costing?</h3>
+    <p class="task">Per ogni costo indica se fa parte delle fasi del produttore (life cycle costing) o se si aggiunge solo nel whole life cycle costing, perché lo sostiene l'utente.</p>
+    <div class="cls" id="cls"></div><div id="o"></div>`;
+    let ok=0;
+    shuffle(ITEMS).forEach(it=>{
+      const row=document.createElement('div');row.className='cl';
+      row.innerHTML=`<div class="t">${it.t}</div><div class="opts inline"></div><p class="fb" hidden></p>`;
+      const o=row.querySelector('.opts'),f=row.querySelector('.fb');
+      [['P','Fasi del produttore'],['U','Solo whole life (utente)']].forEach(([k,l])=>{
+        const x=document.createElement('button');x.type='button';x.className='opt';x.textContent=l;
+        x.onclick=()=>{
+          if(k===it.a){o.querySelectorAll('button').forEach(y=>y.disabled=true);x.classList.add('right');f.hidden=false;f.className='fb ok';f.textContent=it.why;
+            if(++ok===ITEMS.length){fb($('#o'),'ok','<strong>Tutto classificato.</strong> Le fasi del produttore formano il <b>life cycle costing</b>. Installazione, esercizio, manutenzione e smaltimento li paga l\'utente: sommati ai primi danno il <b>whole life cycle cost</b>.');complete(2,$('#o'))}}
+          else{x.classList.add('wrong');x.disabled=true;api.err();f.hidden=false;f.className='fb ko';
+            f.textContent=it.a==='P'?'Questa spesa avviene prima che il chiosco arrivi al bar: chi la paga?':'Questa spesa avviene quando il chiosco è già nel bar: chi la paga?'}};
+        o.appendChild(x)});
+      $('#cls').appendChild(row);
+    });
+  };
+  /* esercizio 3: domanda di verifica */
+  const e3=()=>{
+    ex.innerHTML=`<h3>Domanda di verifica</h3><div id="o3"></div>`;
+    const w=mc($('#o3'),{q:'Rispetto al life cycle costing, il whole life cycle costing aggiunge…',
+      opts:['i costi di progettazione','i costi di logistica','i costi dell\'utente: installazione, esercizio, manutenzione, smaltimento','solo i costi fissi'],a:2,
+      hints:{0:'La progettazione è una fase del produttore: è già nel life cycle costing.',1:'La logistica è l\'ultima fase del produttore: è già nel life cycle costing.',3:'Il whole life cycle costing non distingue tra fissi e variabili: pensa a chi sostiene i costi.'},
+      explain:'Il whole life cycle costing comprende anche ciò che l\'utente paga dopo l\'acquisto.'});
+    /* quando la risposta giusta è data, mostra subito i pulsanti per proseguire */
+    w.querySelectorAll('.opt')[2].addEventListener('click',()=>complete(3,w.querySelector('.out')));
+  };
+  go(1);
+}},
+];
+
+/* ===== motore ===== */
+/* passa dalla vista menu alla vista gioco e viceversa */
+function showMenu(){
+  $('#gioco').hidden=true;$('#menu').hidden=false;
+  renderMenu();renderCards();renderStats();
+  if(location.hash!=='#menu'&&location.hash!==''){try{history.replaceState(null,'','#menu')}catch(e){}}
+  window.scrollTo({top:0});
+}
+function openLevel(n){
+  S.current=n;save();
+  $('#menu').hidden=true;$('#gioco').hidden=false;
+  try{history.replaceState(null,'','#gioco'+(n+1))}catch(e){}
+  renderQuick(n);window.scrollTo({top:0});
+  const L=LEVELS[n];let errors=0;
+  const st=$('#stage');
+  st.innerHTML=`<div class="lvhead"><div class="l"><div class="lvmeta"><span>GIOCO ${n+1} DI ${LEVELS.length}</span><span class="stepn" id="stepn"></span><span id="errs">Errori: 0</span></div><h2>${L.name}</h2></div>
+    <div class="lvbtns"><button class="btn ghost sm" type="button" id="restart">Ricomincia il gioco</button></div></div>
+    <div class="story" id="story"></div><div class="body" id="body"></div>`;
+  $('#restart').onclick=()=>openLevel(n);
+  API={
+    err(){errors++;$('#errs').textContent='Errori: '+errors},
+    story(h){$('#story').innerHTML=h},
+    step(k,label){$('#stepn').textContent=label||`Passo ${k} di ${L.steps}`},
+    finish(ids){
+      const stars=errors===0?3:errors<=2?2:1;
+      const best=Math.max(S.stars[n],stars);S.stars[n]=best;
+      const nw=ids.filter(id=>!S.concepts.includes(id));S.concepts.push(...nw);
+      save();renderQuick(n);renderCards(nw);renderStats();
+      const names=ids.map(id=>CONCEPTS.find(c=>c.id===id).t.toLowerCase()).join(' e ');
+      st.innerHTML=`<div class="win"><span class="eyebrow">Gioco ${n+1} completato</span><h2>Hai scoperto: ${names}</h2>
+        <div class="stars" aria-label="${stars} stelle su 3">${'★'.repeat(stars)}<i>${'★'.repeat(3-stars)}</i></div>
+        <p class="lead">${errors===0?'Nessun errore.':`${errors} error${errors===1?'e':'i'}.`} ${stars<3?'Ripeti il gioco per arrivare a 3 stelle.':''} ${best>stars?`Il tuo record resta ${best} stelle.`:''} La scheda del concetto è nel quaderno, nel menu.</p>
+        <div class="row" id="wb"></div></div>`;
+      const wb=$('#wb');
+      const m=document.createElement('button');m.className='btn';m.type='button';m.textContent='Torna al menu';m.onclick=showMenu;wb.appendChild(m);
+      const r=document.createElement('button');r.className='btn ghost';r.type='button';r.textContent='Ripeti questo gioco';r.onclick=()=>openLevel(n);wb.appendChild(r);
+      if(n<LEVELS.length-1){const b=document.createElement('button');b.className='btn ghost';b.type='button';b.textContent=`Vai al gioco ${n+2}`;b.onclick=()=>openLevel(n+1);wb.appendChild(b)}
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+  };
+  L.run($('#body'),API);
+}
+/* descrizione di ogni gioco nel menu */
+const MENUINFO=[
+  'Gestisci i mesi del bar e scopri quali spese cambiano con i caffè serviti.',
+  'Leggi sul grafico i costi fissi, i costi variabili e il costo totale.',
+  'Nella fabbrica di chioschi: la spesa serve a un chiosco preciso o a tutta l\'azienda?',
+  'Dai a ogni costo due etichette e completa la tabella 2×2.',
+  'Ricostruisci il ciclo di vita di un chiosco e distingui i costi del produttore da quelli dell\'utente.',
+];
+function renderMenu(){
+  $('#menuGrid').innerHTML=LEVELS.map((L,i)=>{
+    const s=S.stars[i];
+    const chips=CONCEPTS.filter(c=>c.k==='Livello '+(i+1)).map(c=>S.concepts.includes(c.id)?`<span class="chip ${c.c}">${c.t}</span>`:`<span class="chip lock">? da scoprire</span>`).join('');
+    const st=s?`<span class="ss" aria-label="${s} stelle su 3">${'★'.repeat(s)}<i>${'★'.repeat(3-s)}</i></span>`:`<span class="ss todo">da giocare</span>`;
+    return `<button type="button" class="game ${s?'done':''}" data-i="${i}" aria-label="Gioco ${i+1}: ${L.name}">
+      <span class="g1"><span class="dot">${i+1}</span><span class="nm">${L.name}</span>${st}</span>
+      <span class="ds">${MENUINFO[i]}</span><span class="chips">${chips}</span>
+      <span class="go">${s?'Rigioca':'Gioca'}</span></button>`}).join('');
+  $('#menuGrid').querySelectorAll('.game').forEach(b=>b.onclick=()=>openLevel(+b.dataset.i));
+}
+/* scorciatoie 1-4 nella barra del gioco */
+function renderQuick(cur){
+  $('#quick').innerHTML='<span>Gioco</span>'+LEVELS.map((L,i)=>`<a href="#gioco${i+1}" data-i="${i}" class="${S.stars[i]?'done':''}" ${i===cur?'aria-current="page"':''} title="${L.name}">${i+1}</a>`).join('');
+  $('#quick').querySelectorAll('a').forEach(a=>a.onclick=e=>{e.preventDefault();openLevel(+a.dataset.i)});
+}
+$('#backTop').onclick=e=>{e.preventDefault();showMenu()};
+function renderCards(nw=[]){
+  $('#cards').innerHTML=CONCEPTS.map(c=>S.concepts.includes(c.id)
+    ?`<article class="card ${nw.includes(c.id)?'new':''}"><span class="k ${c.c}">${c.k}</span><h3>${c.t}</h3><p>${c.d}</p></article>`
+    :`<article class="card locked"><span class="k" style="color:var(--muted)">${c.k}</span><h3>Concetto da scoprire</h3><p>Completa il ${c.k.toLowerCase()} per sbloccare questa scheda.</p></article>`).join('');
+}
+function renderStats(){$('#stStars').textContent=`${S.stars.reduce((a,b)=>a+b,0)} / ${LEVELS.length*3}`;$('#stConc').textContent=`${S.concepts.length} / ${CONCEPTS.length}`}
+
+/* avvio: se il link contiene #gioco1…#gioco5 apre quel gioco, altrimenti il menu */
+renderCards();renderStats();
+const m0=/^#gioco([1-5])$/.exec(location.hash);
+if(m0)openLevel(+m0[1]-1);else showMenu();
+</script>
+
+</body></html>
